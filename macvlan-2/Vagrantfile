@@ -1,0 +1,52 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "ubuntu/bionic64"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "2048"
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get update
+    sudo apt-get install -y git make
+    sudo apt-get install -y \
+        apt-transport-https \
+        ca-certificates \
+        curl \
+        software-properties-common
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo apt-key fingerprint 0EBFCD88
+    sudo add-apt-repository \
+       "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+       $(lsb_release -cs) \
+       stable"
+    sudo apt-get update
+    sudo apt-get install -y docker-ce
+    sudo usermod -aG docker vagrant
+  SHELL
+
+  
+  config.vm.define "vm1" do |vm1|
+    vm1.vm.hostname = "vm1"
+    vm1.vm.network "public_network", bridge: "en0: Wi-Fi (AirPort)"
+    vm1.vm.network "private_network", ip: "192.168.100.11"
+    vm1.vm.network "private_network", ip: "192.168.101.11"
+    vm1.vm.network "private_network", ip: "192.168.102.11"
+  end
+
+  config.vm.define "vm2" do |vm2|
+    vm2.vm.hostname = "vm2"
+    vm2.vm.network "public_network", bridge: "en0: Wi-Fi (AirPort)"
+    vm2.vm.network "private_network", ip: "192.168.100.12"
+    vm2.vm.network "private_network", ip: "192.168.101.12"
+    vm2.vm.network "private_network", ip: "192.168.102.12"
+  end
+
+end
