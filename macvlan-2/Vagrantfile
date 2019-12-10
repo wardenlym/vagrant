@@ -1,17 +1,15 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# brew cask install vagrant
-# vagrant up vm1 vm2
-# vagrant ssh vm1
-# docker run cnrancherXXX
-
 Vagrant.configure("2") do |config|
 
   config.vm.box = "ubuntu/bionic64"
 
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "2048"
+
+    vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+    vb.customize ["modifyvm", :id, "--nicpromisc4", "allow-all"]
   end
 
   config.vm.provision "shell", inline: <<-SHELL
@@ -31,6 +29,8 @@ Vagrant.configure("2") do |config|
     sudo apt-get update
     sudo apt-get install -y docker-ce
     sudo usermod -aG docker vagrant
+    sudo swapoff -a
+    sudo modprobe macvlan
   SHELL
 
   
@@ -38,8 +38,6 @@ Vagrant.configure("2") do |config|
     vm1.vm.hostname = "vm1"
     vm1.vm.network "public_network", bridge: "en0: Wi-Fi (AirPort)"
     vm1.vm.network "private_network", ip: "192.168.100.11"
-    vm1.vm.network "private_network", ip: "192.168.101.11"
-    vm1.vm.network "private_network", ip: "192.168.102.11"
   end
 
   config.vm.define "vm2" do |vm2|
@@ -47,7 +45,12 @@ Vagrant.configure("2") do |config|
     vm2.vm.network "public_network", bridge: "en0: Wi-Fi (AirPort)"
     vm2.vm.network "private_network", ip: "192.168.100.12"
     vm2.vm.network "private_network", ip: "192.168.101.12"
-    vm2.vm.network "private_network", ip: "192.168.102.12"
+  end
+
+  config.vm.define "vm3" do |vm3|
+    vm3.vm.hostname = "vm3"
+    vm3.vm.network "public_network", bridge: "en0: Wi-Fi (AirPort)"
+    vm3.vm.network "private_network", ip: "192.168.101.13"
   end
 
 end
